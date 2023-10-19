@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "tm_utils.h": "c",
+        "tm_tasks_funcs.h": "c"
+    }
+}

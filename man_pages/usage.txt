@@ -1,0 +1,21 @@
+tasksmanager tool is a TODO list like bash utility.
+Designed to work on bash, allows you to create tasks and subtasks
+assigning them different status.
+
+Usage:
+tasksmanager [options]
+
+Flags:
+
+        -h | --help                          Show usage help
+        -i | --setup                         Create ~/.tasks_manager dir if non-existing
+        --new-task                           Create new father task
+        --new-subtask                        Create new subtask
+        -f | --father-task [task_name]       Task name [MAX 128]
+        -z | --subtask                       Subtask name [MAX 128]
+        -d | --description [description]     Task's description [MAX 16384]
+        -s | --status [status]               Task status
+                                             0 - READY
+                                             1 - IN PROGRESS
+                                             2 - DONE
+                                             3 - ABANDONED
