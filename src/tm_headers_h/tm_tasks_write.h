@@ -1,5 +1,5 @@
-#ifndef TM_TASKS_FUNCS_H
-#define TM_TASKS_FUNCS_H
+#ifndef TM_TASKS_WRITE_H
+#define TM_TASKS_WRITE_H
 
 /*
  * Tasks functions header file
@@ -16,4 +16,4 @@ int _set_task_type(char *path, int type);
 int _write_status_file(char *path, int status);
 int _write_description_file(char *path, char *description, int update);
 
-#endif // TM_TASKS_FUNCS_H
+#endif // TM_TASKS_WRITE_H

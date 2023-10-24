@@ -16,7 +16,8 @@
     (1 == stat ? "IN PROGRESS" :                   \
     (2 == stat ? "DONE"        :                   \
     (3 == stat ? "ABANDONED"   :                   \
-                 "NOT DEFINED"))))
+    (4 == stat ? "BLOCKED"     :                   \
+                 "NOT DEFINED")))))
 
 typedef struct
 {

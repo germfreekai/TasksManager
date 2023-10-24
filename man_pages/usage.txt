@@ -12,7 +12,7 @@ Flags:
         --new-task                           Create new father task
         --new-subtask                        Create new subtask
         -f | --father-task [task_name]       Task name [MAX 128]
-        -z | --subtask                       Subtask name [MAX 128]
+        -z | --subtask [subtask_name]        Subtask name [MAX 128]
         -d | --description [description]     Task's description [MAX 16384]
         -s | --status [status]               Task status
                                              0 - READY

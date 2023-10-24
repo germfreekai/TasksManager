@@ -9,7 +9,7 @@
 #include "tm_headers_h/tm_utils.h"
 #include "tm_headers_h/tm_setup.h"
 #include "tm_headers_h/tm_definitions.h"
-#include "tm_headers_h/tm_tasks_funcs.h"
+#include "tm_headers_h/tm_tasks_write.h"
 
 int main(int argc, char *argv[argc + 1])
 {
@@ -29,6 +29,7 @@ int main(int argc, char *argv[argc + 1])
 
     // Task Struct
     Task *task = set_new_task_struct();
+    char *tm_home_dir = NULL;
 
     while (1)
     {
@@ -37,6 +38,7 @@ int main(int argc, char *argv[argc + 1])
             {"setup", no_argument, NULL, 'i'},
             {"new-task", no_argument, &new_task_flag, 1},
             {"new-subtask", no_argument, &new_sub_task_flag, 1},
+            {"list_tasks", no_argument, NULL, 'l'},
             {"father-task", required_argument, NULL, 'f'},
             {"description", required_argument, NULL, 'd'},
             {"status", required_argument, NULL, 's'},
@@ -45,7 +47,7 @@ int main(int argc, char *argv[argc + 1])
 
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "hif:z:d:s:", long_options, &option_index);
+        c = getopt_long (argc, argv, "hif:z:d:s:l", long_options, &option_index);
 
         /* Detect the end of the options */
         if (c == -1)
@@ -102,6 +104,9 @@ int main(int argc, char *argv[argc + 1])
                 fprintf(stdout, "[+] Status: %s\n", STATUS_STR(stat));
                 task->status = stat;
                 break;
+            case 'l':
+                //ret = list_tasks();
+                goto end_execution;
             case '?':
                 break;
             default:
@@ -110,12 +115,13 @@ int main(int argc, char *argv[argc + 1])
     }
 
     // Look for task manager home dir
-    char *tm_home_dir = get_home_dir();
+    tm_home_dir = get_home_dir();
     if (dir_exists(tm_home_dir))
     {
         fprintf(stderr, "[x] Missing TaskManager home dir.\n");
         goto exit_failure;
     }
+
     // Create new father task
     if (new_task_flag)
     {
