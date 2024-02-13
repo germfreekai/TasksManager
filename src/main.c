@@ -10,6 +10,7 @@
 #include "tm_headers_h/tm_setup.h"
 #include "tm_headers_h/tm_definitions.h"
 #include "tm_headers_h/tm_tasks_write.h"
+#include "tm_headers_h/tm_tasks_read.h"
 
 int main(int argc, char *argv[argc + 1])
 {
@@ -105,7 +106,7 @@ int main(int argc, char *argv[argc + 1])
                 task->status = stat;
                 break;
             case 'l':
-                //ret = list_tasks();
+                ret = list_tasks(task);
                 goto end_execution;
             case '?':
                 break;

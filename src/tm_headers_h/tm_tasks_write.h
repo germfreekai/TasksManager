@@ -2,9 +2,9 @@
 #define TM_TASKS_WRITE_H
 
 /*
- * Tasks functions header file
+ * Tasks write functions header file
  *
- * Functions to manage tasks
+ * Create/write tasks
  */
 
 #include "./tm_definitions.h"

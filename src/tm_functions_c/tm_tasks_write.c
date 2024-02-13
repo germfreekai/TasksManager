@@ -1,5 +1,5 @@
 /*
- * Tasks functions implementation file
+ * Tasks write functions implementation file
  */
 
 #include <stdio.h>

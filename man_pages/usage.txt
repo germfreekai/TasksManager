@@ -15,7 +15,8 @@ Flags:
         -z | --subtask [subtask_name]        Subtask name [MAX 128]
         -d | --description [description]     Task's description [MAX 16384]
         -s | --status [status]               Task status
-                                             0 - READY
+                                             0 - READY (DEFAULT)
                                              1 - IN PROGRESS
                                              2 - DONE
                                              3 - ABANDONED
+                                             4 - BLOCKED

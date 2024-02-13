@@ -34,7 +34,7 @@ int read_man_page(char *man_page)
 
     if ( !(fptr = fopen(path, "r")) )
     {
-        fprintf(stderr, "Failed to read man page: %s\n", man_page);
+        fprintf(stderr, "[x] Failed to read man page: %s\n", man_page);
         free(path);
         ret = 1;
     }
@@ -74,15 +74,46 @@ void end_tm_execution(int exit_code)
  * Set memory for a path variable
  * 
  * Returns:
- *  - path (char*) - dynamic memory var
+ *  - path (char*) - dynamic memory var [PATH_MAX]
  *                   Null terminated at index 0
  */
 char *set_path_var()
 {
     char *path = (char*)calloc(PATH_MAX, sizeof(char));
     path[0] = '\0';
+
     return path;
 }
+
+/*
+ * Set memory for a description type variable
+ *
+ * Returns:
+ *  - var (char*) - dynamic memory var [MAX_TASK_DESCRIPTION]
+ *                  Null terminated at index 0
+ */
+char *set_description_var()
+{
+    char *var = (char*)calloc(MAX_TASK_DESCRIPTION, sizeof(char));
+    var[0] = '\0';
+
+    return var;
+}
+
+/* Set memory for a task name variable
+ *
+ * Returns:
+ *  task_name (char*) - dynamic memory task_name [MAX_TASK_NAME]
+ *                      Null terminated at index 0
+ */
+char *set_task_name_var()
+{
+    char *task_name = (char*)calloc(MAX_TASK_NAME, sizeof(char));
+    task_name[0] = '\0';
+
+    return task_name;
+}
+
 /*
  * Get current user home directory
  * 
@@ -153,18 +184,15 @@ int create_dir(char *path)
  * Returns:
  *  - task (Task*) - initialized task struct
  */
-Task* set_new_task_struct()
+Task *set_new_task_struct()
 {
     Task *task = (Task*)malloc(sizeof(Task));
 
-    task->father_task = (char*)calloc(MAX_TASK_NAME, sizeof(char));
-    task->father_task[0] = '\0';
+    task->father_task = set_task_name_var();
 
-    task->subtask = (char*)calloc(MAX_TASK_NAME, sizeof(char));
-    task->subtask[0] = '\0';
+    task->subtask = set_task_name_var();
 
-    task->task_description = (char*)calloc(MAX_TASK_DESCRIPTION, sizeof(char));
-    task->task_description[0] = '\0';
+    task->task_description = set_description_var();
 
     task->status = -1;
 
@@ -274,4 +302,49 @@ int write_file(char *path, char *content, int update)
 int remove_file(char *path)
 {
     return remove(path);
+}
+
+/*
+ * Read file
+ *
+ * Arguments:
+ *  - path (char*) - abosulte path to file
+ *  - dst (char*) - dst char memory space
+ * Returns:
+ *  - ret (int) - success status
+ *                0 - success
+ *                1 - failure
+ */
+int read_file(char *path, char *dst)
+{
+    FILE *fptr;
+    int ret;
+
+    // read file
+    if ( !(fptr = fopen(path, "r")) )
+    {
+        fprintf(stderr, "[x] Failed to read file: %s\n", path);
+        goto exit_failure;
+    }
+    else
+    {
+        char ch = fgetc(fptr);
+
+        while (ch != EOF)
+        {
+            strncat(dst, &ch, 1);
+            ch = fgetc(fptr);
+
+        }
+
+        fclose(fptr);
+
+        ret = 0;
+    }
+
+exit_func:
+    return ret;
+exit_failure:
+    ret = 1;
+    goto exit_func;
 }
