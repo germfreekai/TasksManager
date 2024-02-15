@@ -129,10 +129,13 @@ int create_sub_task(Task *task)
     }
 
     // Create description file if given
-    if (_write_description_file(task_path, task->task_description, 0))
+    if (strlen(task->task_description) != 0)
     {
-        fprintf(stderr, "[x] Failed to create description file for subtask: %s\n", task->subtask);
-        goto return_failure;
+        if (_write_description_file(task_path, task->task_description, 0))
+        {
+            fprintf(stderr, "[x] Failed to create description file for subtask: %s\n", task->subtask);
+            goto return_failure;
+        }
     }
     
     ret = 0;
@@ -162,7 +165,7 @@ int _create_task(char *path)
 {
     if (! dir_exists(path))
     {
-        fprintf(stdout, "[x] Task already exists: %s\n", path);
+        fprintf(stdout, "[x] Father task already exists\n");
         return 1;
     }
 
@@ -254,13 +257,13 @@ int _write_status_file(char *task_path, int status)
 int _write_description_file(char *task_path, char *description, int update)
 {
     int ret = 0;
+    char *description_file = set_path_var();
 
     // If no description given - skip
     if (strlen(description) == 0)
         goto exit_func;
 
     // TODO - implement case when append is required
-    char *description_file = set_path_var();
     strcat(description_file, task_path);
     strcat(description_file, "/description");
 
@@ -274,12 +277,12 @@ int _write_description_file(char *task_path, char *description, int update)
 
         if (create_file(description_file))
         {
-            fprintf(stderr, "[x] Failed to create description file: %s\n");
+            fprintf(stderr, "[x] Failed to create description file\n");
             goto return_failure;
         }
         if (write_file(description_file, description, update))
         {
-            fprintf(stderr, "[x] Failed to write description file: %s\n");
+            fprintf(stderr, "[x] Failed to write description file\n");
             goto return_failure;
         }
     }

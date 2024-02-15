@@ -62,9 +62,11 @@ int main(int argc, char *argv[argc + 1])
             case 'h':
                 read_man_page("usage.txt");
                 goto end_execution;
+                /* NOTREACHED */
             case 'i':
                 ret = setup_home_dir();
                 goto end_execution;
+                /* NOTREACHED */
             case 'f':
                 if (strlen(task->father_task) != 0)
                     break;
@@ -128,6 +130,11 @@ int main(int argc, char *argv[argc + 1])
     {
         new_sub_task_flag = 0;
         fprintf(stdout, "[+] Create new father task\n");
+        if (strlen(task->task_description) == 0)
+        {
+            fprintf(stderr, "[x] Father tasks must contain a description\n");
+            goto exit_failure;
+        }
         ret = create_father_task(task);
         if (ret)
             goto exit_failure;
