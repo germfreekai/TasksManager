@@ -10,39 +10,11 @@
 #include "../tm_headers_h/tm_definitions.h"
 #include "../tm_headers_h/tm_utils.h"
 
-/*
- * Set current task struct dynamic memory allocation
- * 
- * Returns:
- *  - current_task (Current_Task*) - initialized struct
- */
-Current_Task *_set_current_task_struct()
-{
-    Current_Task *current_task = (Current_Task*)malloc(sizeof(Current_Task));
-    
-    current_task->task_name = set_path_var();
-    
-    current_task->status = set_description_var();
-
-    current_task->subtasks_num = 0;
-
-    return current_task;
-}
-
-/*
- * Free allocated memory for Current_Task struct
- *
- * Arguments:
- *  - current_task (Current_Task*) - initialized struct
- */
-void _free_current_task_struct(Current_Task *current_task)
-{
-    free(current_task->task_name);
-    free(current_task->status);
-
-    free(current_task);
-}
-
+enum OPTIONS {
+    ALL = 0,
+    FATHER = 1,
+    OTHER = 2
+};
 /*
  * List existing tasks at $TASKS_HOME
  *
@@ -53,171 +25,35 @@ void _free_current_task_struct(Current_Task *current_task)
  *                0 - success
  *                1 - failure
  */
-int list_tasks(Task *task)
+int list_tasks(char *list_option)
 {
     int ret;
-    char *home_dir = get_home_dir();  //../.tasks_manager/
 
-    // Initiliaze helper struct
-    Current_Task* current_task = _set_current_task_struct();
+    // Will a function per option
+    // pro code readability
 
-    char *father_file = NULL;
+    enum OPTIONS opt = (!strcmp(list_option, "father")) ? FATHER : \
+                       (!strcmp(list_option, "all")) ? ALL : OTHER;
 
-    if(dir_exists(home_dir))
+    switch (opt)
     {
-        fprintf(stderr, "[x] TasksManager home dir does not exits.\n");
-        goto return_failure;
+        case 0:
+            ret = _display_tasks(NULL, 0);
+            goto exit_func;
+            break;
+        case 1:
+            ret = _display_tasks(NULL, 1);
+            goto exit_func;
+            break;
+        default:
+            ret = _display_tasks(list_option, 0);
+            goto exit_func;
+            break;
     }
-
-    DIR *dir;
-    struct dirent *drnt;
-
-    if (!(dir = opendir(home_dir)))
-    {
-        fprintf(stderr, "[x] Failed to read TasksManager home dir.\n");
-        goto return_failure;
-    }
-
-    father_file = set_path_var();
-
-    // Read through tasks manager home dir 
-    while ((drnt = readdir(dir)) != NULL)
-    {
-        // Skip father and current dir
-        if (! strcmp(drnt->d_name, ".") || ! strcmp(drnt->d_name, ".."))
-            continue;
-        else if (drnt->d_type == DT_DIR)  // Found a dir
-        {
-            // Make sure it is a father dir
-            strcpy(father_file, home_dir);
-            strcat(father_file, drnt->d_name);
-            strcat(father_file, "/.father");
-            if (file_exists(father_file))
-            {
-                // It is not a father task
-                continue;
-            }
-            fprintf(stdout, "[+] father task exist: %s\n", drnt->d_name);
-            // Get task to investigate
-            strcpy(current_task->task_name, home_dir);
-            strcat(current_task->task_name, drnt->d_name);
-            strcat(current_task->task_name, "/");  //../.tasks_manager/task1/
-
-            fprintf(stdout, "[~] current task name before getting father task info: %s\n", current_task->task_name);
-            // Populate struct
-            if (_get_father_task_info(current_task))
-            {
-                fprintf(stderr, "[x] Failed to read father task: %s\n", current_task->task_name);
-                goto return_failure;
-            }
-
-            strcpy(current_task->task_name, drnt->d_name);
-            // Print info
-            if (_print_father_task_info(current_task))
-            {
-                fprintf(stderr, "[x] Failed to print father task info: %s\n", current_task->task_name);
-                goto return_failure;
-            }
-
-            // Return to 0 
-            current_task->subtasks_num = 0;
-            current_task->status[0] = '\0';
-        }
-        
-    }
-
+ 
     ret = 0;
 
 exit_func:
-    free(home_dir);
-    _free_current_task_struct(current_task);
-    if(father_file)
-        free(father_file);
-    closedir(dir);
-    return ret;
-return_failure:
-    ret = 1;
-    goto exit_func;
-}
-
-/*
- * Get father task info helper func
- * Get n of subtasks and status file
- * 
- * Arguments:
- *  - current_task (Current_Task*) - initialized struct
- * Returns:
- *  - ret (int) - success status
- *                0 - success
- *                1 - failure
- * Note: task_name passed as: ../.tasks_manager/task1/
- */
-int _get_father_task_info(Current_Task *current_task)
-{
-    DIR *dir;
-    struct dirent *drnt;
-    char *subtask_file = NULL;
-    char *status_file = NULL;
-
-    int ret;
-
-    // Open father task
-    if (!(dir = opendir(current_task->task_name)))
-        goto exit_failure;
-    
-    fprintf(stdout, "current_task->father_name -> %s\n", current_task->task_name);
-    fprintf(stdout, "current_task->subtask: %d\n", current_task->subtasks_num);
-
-    subtask_file = set_path_var();
-    status_file = set_path_var();
-
-    while ((drnt = readdir(dir)) != NULL)
-    {
-        if (! strcmp(drnt->d_name, ".") || ! strcmp(drnt->d_name, ".."))
-            continue;
-        else if (drnt->d_type == DT_DIR)
-        {
-            // Make sure it is a subtask
-            strcpy(subtask_file, current_task->task_name);
-            strcat(subtask_file, drnt->d_name);
-            strcat(subtask_file, "/.subtask");
-
-            fprintf(stdout, "subtask before validation: %s\n", subtask_file);
-            if (file_exists(subtask_file))
-            {
-                // It is not a subtask
-                continue;
-            }
-            
-            // At this point we know we are at a valid subtask dir
-            current_task->subtasks_num++;
-        }
-        // Look for status file
-        else
-        {
-            // Other than status
-            if (strcmp(drnt->d_name, "status"))
-                continue;
-
-            strcat(status_file, current_task->task_name);
-            strcat(status_file, "status");
-            
-            if (read_file(status_file, current_task->status))
-            {
-                fprintf(stderr, "[x] Failed to read status file for task: %s\n", current_task->task_name);
-                goto exit_failure;
-            }
-        }
-    }
-
-    ret = 0;
-
-exit_func:
-    if (subtask_file)
-        free(subtask_file);
-    if (status_file)
-        free(status_file);
-    closedir(dir);
     return ret;
 exit_failure:
     ret = 1;
@@ -225,21 +61,142 @@ exit_failure:
 }
 
 /*
- * Print father task info template
- *
+ * Display all existing tasks
+ * 
  * Arguments:
- *  - current_task (Current_Task*) - initialized struct
+ *  - flag_subtasks (int) - display subtasks
  * Returns:
  *  - ret (int) - success status
  *                0 - success
  *                1 - failure
  */
-int _print_father_task_info(Current_Task *current_task)
+int _display_tasks(char *list_option, int flag_subtasks)
 {
-    fprintf(stdout, "[+] Task Name: %s\n", current_task->task_name);
-    if (current_task->status)
-        fprintf(stdout, "[+] Status: %s\n", current_task->status);
-    fprintf(stdout, "[+] Subtasks: %d\n", current_task->subtasks_num);
+    int ret;
+    
+    //ShowTasks show_tasks = set_show_tasks();
+    char *home_dir = get_home_dir();
+    char *father_path = set_path_var();
+    char *father_file = set_path_var();
 
-    return 0;
+    int compare_flag = 0;
+    if (list_option)
+        compare_flag = 1;
+
+    DIR *dir;
+    struct dirent *drnt;
+
+    if (!(dir = opendir(home_dir)))
+    {
+        fprintf(stderr, "[x] Failed to open home dir\n");
+        goto exit_failure;
+    }
+
+    while ((drnt = readdir(dir)) != NULL)
+    {
+        // skip '.' and '..'
+        if (!strcmp(drnt->d_name, ".") || !strcmp(drnt->d_name, ".."))
+            continue;
+        // Found a directory
+        else if (drnt->d_type == DT_DIR)
+        {
+            if (compare_flag)
+                if (strcmp(drnt->d_name, list_option))
+                    continue;
+
+            strcpy(father_path, home_dir);  // like creating a copy for home_dir
+            strcat(father_path, drnt->d_name);
+            
+            // how do we know it is a fater dir? Double check
+            strcpy(father_file, father_path);
+            strcat(father_file, "/.father");
+            if (file_exists(father_file)) // not a father file? skip
+                continue;
+            
+            // we know it is a father task
+            fprintf(stdout, "+ %s\n", drnt->d_name);
+
+            if (!flag_subtasks)
+                _print_sub_tasks(father_path);
+        }
+        else
+            continue;
+    }
+
+    closedir(dir);
+
+    ret = 0;
+
+exit_func:
+    free(home_dir);
+    free(father_path);
+    free(father_file);
+
+    return ret;
+exit_failure:
+    ret = 1;
+    goto exit_func;
+}
+
+/*
+ * _display_all_tasks auxiliary function
+ * to print all subtaks on a father task
+ * 
+ * Arguments:
+ *  - father_path (char) - path to a father task
+ * 
+ * Returns:
+ *  - ret (int) - success status
+ *                0 - success
+ *                1 - failure
+ */
+int _print_sub_tasks(char *father_path)
+{
+    int ret;
+
+    DIR *dir;
+    struct dirent *drnt;
+    char *subtask_path = set_path_var();
+    char *subtask_file = set_path_var();
+
+    if (!(dir = opendir(father_path)))
+    {
+        fprintf(stderr, "[x] Failed to open father task: %s\n", father_path);
+        goto exit_failure;
+    }
+
+    while ((drnt = readdir(dir)) != NULL)
+    {
+        if (!strcmp(drnt->d_name, ".") || !strcmp(drnt->d_name, ".."))
+            continue;
+        else if (drnt->d_type == DT_DIR)
+        {
+            strcpy(subtask_path, father_path);
+            strcat(subtask_path, "/");
+            strcat(subtask_path, drnt->d_name);
+
+            // make sure it is a subtask
+            strcpy(subtask_file, subtask_path);
+            strcat(subtask_file, "/.subtask");
+            if (file_exists(subtask_file))
+                continue;
+
+            fprintf(stdout, "  ├ %s\n", drnt->d_name);
+
+        }
+        else
+            continue;
+    }
+
+    closedir(dir);
+
+    ret = 0;
+
+exit_func:
+    free(subtask_file);
+    free(subtask_path);
+    return ret;
+exit_failure:
+    ret = 1;
+    goto exit_func;
 }

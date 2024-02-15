@@ -333,7 +333,7 @@ int read_file(char *path, char *dst)
         while (ch != EOF)
         {
             strncat(dst, &ch, 1);
-            ch = fgetc(fptr);
+            ch = (char)fgetc(fptr);
 
         }
 

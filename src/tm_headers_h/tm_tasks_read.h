@@ -9,21 +9,9 @@
 
 #include "./tm_definitions.h"
 
-/*
- * Helper struct to print current tasks
- */
-typedef struct
-{
-    char *task_name;
-    int subtasks_num;
-    char *status;
-}Current_Task;
+int list_tasks(char *list_option);
 
-Current_Task *_set_current_task_struct();
-void _free_current_task_struct(Current_Task *current_task);
-
-int list_tasks(Task *task);
-int _get_father_task_info(Current_Task *current_task);
-int _print_father_task_info(Current_Task *current_task);
+int _display_tasks(char *list_option, int flag_subtasks);
+int _print_sub_tasks(char *father_path);
 
 #endif // TM_TASKS_READ_H

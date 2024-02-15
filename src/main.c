@@ -28,9 +28,10 @@ int main(int argc, char *argv[argc + 1])
     static int new_task_flag;
     static int new_sub_task_flag;
 
-    // Task Struct
+    // Declarations
     Task *task = set_new_task_struct();
     char *tm_home_dir = NULL;
+    char *list_option = NULL;
 
     while (1)
     {
@@ -39,7 +40,7 @@ int main(int argc, char *argv[argc + 1])
             {"setup", no_argument, NULL, 'i'},
             {"new-task", no_argument, &new_task_flag, 1},
             {"new-subtask", no_argument, &new_sub_task_flag, 1},
-            {"list_tasks", no_argument, NULL, 'l'},
+            {"list-tasks", required_argument, NULL, 'l'},
             {"father-task", required_argument, NULL, 'f'},
             {"description", required_argument, NULL, 'd'},
             {"status", required_argument, NULL, 's'},
@@ -48,7 +49,7 @@ int main(int argc, char *argv[argc + 1])
 
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "hif:z:d:s:l", long_options, &option_index);
+        c = getopt_long (argc, argv, "hif:z:d:s:l:", long_options, &option_index);
 
         /* Detect the end of the options */
         if (c == -1)
@@ -62,11 +63,11 @@ int main(int argc, char *argv[argc + 1])
             case 'h':
                 read_man_page("usage.txt");
                 goto end_execution;
-                /* NOTREACHED */
+                break;
             case 'i':
                 ret = setup_home_dir();
                 goto end_execution;
-                /* NOTREACHED */
+                break;
             case 'f':
                 if (strlen(task->father_task) != 0)
                     break;
@@ -108,7 +109,10 @@ int main(int argc, char *argv[argc + 1])
                 task->status = stat;
                 break;
             case 'l':
-                ret = list_tasks(task);
+                list_option = set_task_name_var();
+                strcat(list_option, optarg);
+                ret = list_tasks(list_option);
+                free(list_option);
                 goto end_execution;
             case '?':
                 break;
