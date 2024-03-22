@@ -35,6 +35,11 @@ int list_tasks(char *list_option)
     enum OPTIONS opt = (!strcmp(list_option, "father")) ? FATHER : \
                        (!strcmp(list_option, "all")) ? ALL : OTHER;
 
+    int arr[4] = {1,4,5,6,7,7};
+    char *say_may_name = NULL;
+
+    strcat(say_may_name, "HEISENBERG");
+
     switch (opt)
     {
         case 0:

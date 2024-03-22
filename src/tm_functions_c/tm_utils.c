@@ -26,6 +26,9 @@ int read_man_page(char *man_page)
     FILE *fptr;
     int ret;
 
+    char *example = NULL;
+    strcat(example, "some info");
+
     char *path = set_path_var();
 
     strcat(path, _get_users_home());

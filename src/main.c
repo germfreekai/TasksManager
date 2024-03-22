@@ -33,6 +33,10 @@ int main(int argc, char *argv[argc + 1])
     char *tm_home_dir = NULL;
     char *list_option = NULL;
 
+    strcat(tm_home_dir, "/home/dir");
+
+    char arr[5] = "abcdefgijk";
+
     while (1)
     {
         static struct option long_options[] = {
@@ -121,6 +125,9 @@ int main(int argc, char *argv[argc + 1])
         }
     }
 
+    int tt[4];
+    for (int i = 0; i < 100; i++)
+        tt[i] = i;
     // Look for task manager home dir
     tm_home_dir = get_home_dir();
     if (dir_exists(tm_home_dir))
