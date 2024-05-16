@@ -11,6 +11,7 @@ Flags:
         -i | --setup                         Create ~/.tasks_manager dir if non-existing
         --new-task                           Create new father task
         --new-subtask                        Create new subtask
+        --describe-tasks                     Get tasks details
         -f | --father-task [task_name]       Task name [MAX 128]
         -z | --subtask [subtask_name]        Subtask name [MAX 128]
         -d | --description [description]     Task's description [MAX 16384]
@@ -20,3 +21,7 @@ Flags:
                                              2 - DONE
                                              3 - ABANDONED
                                              4 - BLOCKED
+        -l | --list-tasks                    List tasks
+                                             father - prints only father tasks
+                                             all    - prints father and subtasks
+                                             [father_task_name] - prints only given father task

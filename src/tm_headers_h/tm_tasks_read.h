@@ -10,6 +10,7 @@
 #include "./tm_definitions.h"
 
 int list_tasks(char *list_option);
+int describe_tasks(Task *task);
 
 int _display_tasks(char *list_option, int flag_subtasks);
 int _print_sub_tasks(char *father_path);

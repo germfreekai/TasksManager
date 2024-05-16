@@ -27,6 +27,7 @@ int main(int argc, char *argv[argc + 1])
     // Static flags
     static int new_task_flag;
     static int new_sub_task_flag;
+    static int describe;
 
     // Declarations
     Task *task = set_new_task_struct();
@@ -40,6 +41,7 @@ int main(int argc, char *argv[argc + 1])
             {"setup", no_argument, NULL, 'i'},
             {"new-task", no_argument, &new_task_flag, 1},
             {"new-subtask", no_argument, &new_sub_task_flag, 1},
+            {"describe-tasks", no_argument, &describe, 1},
             {"list-tasks", required_argument, NULL, 'l'},
             {"father-task", required_argument, NULL, 'f'},
             {"description", required_argument, NULL, 'd'},
@@ -129,6 +131,18 @@ int main(int argc, char *argv[argc + 1])
         goto exit_failure;
     }
 
+    // Get tasks details
+    if (describe)
+    {
+        fprintf(stdout, "[+] Describing tasks\n");
+        ret = describe_tasks(task);
+
+        if (ret)
+            goto exit_failure;
+        else
+            goto exit_success;
+    }
+
     // Create new father task
     if (new_task_flag)
     {
@@ -149,6 +163,11 @@ int main(int argc, char *argv[argc + 1])
     if (new_sub_task_flag)
     {
         fprintf(stdout, "[+] Create new subtask\n");
+        if (strlen(task->task_description) == 0)
+        {
+            fprintf(stderr, "[x] Missing description\n");
+            goto exit_failure;
+        }
         ret = create_sub_task(task);
         if (ret)
             goto exit_failure;
