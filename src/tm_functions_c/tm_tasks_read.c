@@ -150,11 +150,12 @@ int describe_tasks(Task *task)
     else
         fprintf(stdout, "[+] Father task: %s\n", task->father_task);
     char last_char = status_file_content[strlen(status_file_content)];
+    fprintf(stdout, "[+] STATUS: %s\n", status_file_content);
     if (last_char == '\0' || last_char == 10)
-        fprintf(stdout, "DESCRIPTION: %s", description_file_content);
+        fprintf(stdout, "[+] DESCRIPTION: %s\n", description_file_content);
     else
-        fprintf(stdout, "DESCRIPTION: %s\n", description_file_content);
-    fprintf(stdout, "STATUS: %s\n", status_file_content);
+        fprintf(stdout, "[+] DESCRIPTION: %s\n", description_file_content);
+
 
     if (! subtask)
     {
