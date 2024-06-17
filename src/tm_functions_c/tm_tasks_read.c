@@ -203,6 +203,8 @@ int _display_tasks(char *list_option, int flag_subtasks)
     char *home_dir = get_home_dir();
     char *father_path = set_path_var();
     char *father_file = set_path_var();
+    char *status_file = set_path_var();
+    char *current_status = set_task_name_var();
 
     int compare_flag = 0;
     if (list_option)
@@ -238,8 +240,16 @@ int _display_tasks(char *list_option, int flag_subtasks)
             if (file_exists(father_file)) // not a father file? skip
                 continue;
             
-            // we know it is a father task
-            fprintf(stdout, "+ %s\n", drnt->d_name);
+            strcpy(status_file, father_path);
+            strcat(status_file, "/status");
+            if (! file_exists(status_file))
+            {
+                read_file(status_file, current_status);
+                fprintf(stdout, "+ %s - %s\n", drnt->d_name, current_status);
+            }
+            else
+                // we know it is a father task
+                fprintf(stdout, "+ %s\n", drnt->d_name);
 
             if (!flag_subtasks)
                 _print_sub_tasks(father_path);
@@ -256,6 +266,8 @@ exit_func:
     free(home_dir);
     free(father_path);
     free(father_file);
+    free(current_status);
+    free(status_file);
 
     return ret;
 exit_failure:
@@ -283,6 +295,8 @@ int _print_sub_tasks(char *father_path)
     struct dirent *drnt;
     char *subtask_path = set_path_var();
     char *subtask_file = set_path_var();
+    char *status_file = set_path_var();
+    char *current_status = set_task_name_var();
 
     if (!(dir = opendir(father_path)))
     {
@@ -306,7 +320,16 @@ int _print_sub_tasks(char *father_path)
             if (file_exists(subtask_file))
                 continue;
 
-            fprintf(stdout, "  ├ %s\n", drnt->d_name);
+            strcpy(status_file, father_path);
+            strcat(status_file, "/status");
+            if (! file_exists(status_file))
+            {
+                read_file(status_file, current_status);
+                fprintf(stdout, "  ├ %s - %s\n", drnt->d_name, current_status);
+            }
+            else
+                // we know it is a father task
+                fprintf(stdout, "  ├ %s\n", drnt->d_name);
 
         }
         else
@@ -320,6 +343,8 @@ int _print_sub_tasks(char *father_path)
 exit_func:
     free(subtask_file);
     free(subtask_path);
+    free(status_file);
+    free(current_status);
     return ret;
 exit_failure:
     ret = 1;
