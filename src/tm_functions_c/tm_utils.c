@@ -271,11 +271,21 @@ int write_file(char *path, char *content, int update)
     // TODO: verify if write fron scratch or append
     //       for append, verify total size against MAX_TASK_DESCRIPTION
     int ret = 0;
+    FILE *fptr;
 
-    if (! file_exists(path))
+    if (! file_exists(path) && ! update)
     {
-        FILE *fptr;
         if (! (fptr = fopen(path, "w")))
+            ret = 1;
+        else
+        {
+            fprintf(fptr, "%s", content);
+            fclose(fptr);
+        }
+    }
+    else if (! file_exists(path) && update)
+    {
+        if (! (fptr = fopen(path, "a")))
             ret = 1;
         else
         {

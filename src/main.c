@@ -28,11 +28,14 @@ int main(int argc, char *argv[argc + 1])
     static int new_task_flag;
     static int new_sub_task_flag;
     static int describe;
+    static int u_status;
 
     // Declarations
     Task *task = set_new_task_struct();
     char *tm_home_dir = NULL;
     char *list_option = NULL;
+    int u_description = 0;
+    int update_description = -1;
 
     while (1)
     {
@@ -42,9 +45,11 @@ int main(int argc, char *argv[argc + 1])
             {"new-task", no_argument, &new_task_flag, 1},
             {"new-subtask", no_argument, &new_sub_task_flag, 1},
             {"describe-tasks", no_argument, &describe, 1},
+            {"u-status", no_argument, &u_status, 1},
             {"list-tasks", required_argument, NULL, 'l'},
             {"father-task", required_argument, NULL, 'f'},
             {"description", required_argument, NULL, 'd'},
+            {"u-description", required_argument, NULL, 'u'},
             {"status", required_argument, NULL, 's'},
             {"subtask", required_argument, NULL, 'z'}
         };
@@ -103,6 +108,10 @@ int main(int argc, char *argv[argc + 1])
                 strcat(task->task_description, optarg);
                 fprintf(stdout, "[+] Task description: %s\n", task->task_description);
                 break;
+            case 'u':
+                u_description = 1;
+                update_description = atoi(optarg);
+                break;
             case 's':
                 if (task->status != -1)
                     break;
@@ -141,6 +150,23 @@ int main(int argc, char *argv[argc + 1])
             goto exit_failure;
         else
             goto exit_success;
+    }
+
+    // Update task (description)
+    if (u_description || u_status)
+    {
+        // Make sure we have the values we want to update
+        if (u_description && (! strlen(task->task_description) || update_description == -1))
+        {
+            fprintf(stderr, "[X] Missing description to update or update mode\n");
+            goto exit_failure;
+        }
+        else if (u_status && task->status == -1)
+        {
+            fprintf(stderr, "[X] Missing new status value\n");
+            goto exit_failure;
+        }
+        update_task(task, update_description, u_description, u_status);
     }
 
     // Create new father task

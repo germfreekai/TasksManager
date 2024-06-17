@@ -146,7 +146,7 @@ int describe_tasks(Task *task)
     read_file(description_file, description_file_content);
     read_file(status_file, status_file_content);
     if (subtask)
-        fprintf(stdout, "[+] Father task: %s -> subtask %s\n", task->father_task, task->subtask);
+        fprintf(stdout, "[+] Father task: %s -> Subtask: %s\n", task->father_task, task->subtask);
     else
         fprintf(stdout, "[+] Father task: %s\n", task->father_task);
     char last_char = status_file_content[strlen(status_file_content)];

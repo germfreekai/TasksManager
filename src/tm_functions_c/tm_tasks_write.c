@@ -286,10 +286,91 @@ int _write_description_file(char *task_path, char *description, int update)
             goto return_failure;
         }
     }
+    else
+    {
+        if (write_file(description_file, description, update))
+        {
+            fprintf(stderr, "[x] Failed to append description file\n");
+            goto return_failure;
+        }
+    }
 
 exit_func:
     if (description_file)
         free(description_file);
+    return ret;
+return_failure:
+    ret = 1;
+    goto exit_func;
+}
+
+/*
+ * Update description/status of given father task
+ * or subtask
+ *
+ * Arguments:
+ *  - task (Task*) - task structure
+ *  - update_description (int) - description update option
+ *  - u_description (int) - boolean to update description
+ *  - u_status (int) - boolean to update status
+ *
+ * Returns:
+ *  - ret (int) - exit status
+ *                0 - success
+ *                1 - failure
+ */
+int update_task(Task *task, int update_description, int u_description, int u_status)
+{
+    int ret;
+    // Get tash to update
+    char *task_path = get_home_dir();
+    char *task_type_file = set_path_var();
+
+    strcat(task_path, task->father_task);
+
+    strcpy(task_type_file, task_path);
+    strcat(task_type_file, "/.father");
+    if (dir_exists(task_path) || file_exists(task_type_file))
+    {
+        fprintf(stderr, "[X] Father task does not exit or is not a father task.\n");
+        goto return_failure;
+    }
+    // subtask?
+    if (strlen(task->subtask) > 0)
+    {
+        strcat(task_path, "/");
+        strcat(task_path, task->subtask);
+
+        strcpy(task_type_file, task_path);
+        strcat(task_type_file, "/.subtask");
+        if (dir_exists(task_path) || file_exists(task_type_file))
+        {
+            fprintf(stderr, "[X] Subtask does not exist or is not a subtask.\n");
+            goto return_failure;
+        }
+    }
+
+    // update status
+    if (task->status != -1 && u_status)
+    {
+        // Create status file
+        if (_write_status_file(task_path, task->status))
+        {
+            fprintf(stderr, "[x] Failed to update status file: %s\n", task->father_task);
+            goto return_failure;
+        }
+    }
+
+    if (strlen(task->task_description) > 0 && u_description)
+    {
+        // Create description file if given
+        if (_write_description_file(task_path, task->task_description, update_description))
+            goto return_failure;
+    }
+    ret = 0;
+exit_func:
+    free(task_path);
+    free(task_type_file);
     return ret;
 return_failure:
     ret = 1;
