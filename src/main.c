@@ -29,6 +29,7 @@ int main(int argc, char *argv[argc + 1])
     static int new_sub_task_flag;
     static int describe;
     static int u_status;
+    static int remove;
 
     // Declarations
     Task *task = set_new_task_struct();
@@ -45,6 +46,7 @@ int main(int argc, char *argv[argc + 1])
             {"new-task", no_argument, &new_task_flag, 1},
             {"new-subtask", no_argument, &new_sub_task_flag, 1},
             {"describe-tasks", no_argument, &describe, 1},
+            {"remove", no_argument, &remove, 1},
             {"u-status", no_argument, &u_status, 1},
             {"list-tasks", required_argument, NULL, 'l'},
             {"father-task", required_argument, NULL, 'f'},
@@ -140,6 +142,17 @@ int main(int argc, char *argv[argc + 1])
         goto exit_failure;
     }
 
+    // Remove a task
+    if (remove)
+    {
+        fprintf(stdout, "[+] Removing task...\n");
+        ret = remove_dir(task);
+        if (ret)
+            goto exit_failure;
+        else
+            goto exit_success;
+    }
+
     // Get tasks details
     if (describe)
     {
@@ -166,7 +179,11 @@ int main(int argc, char *argv[argc + 1])
             fprintf(stderr, "[X] Missing new status value\n");
             goto exit_failure;
         }
-        update_task(task, update_description, u_description, u_status);
+        ret = update_task(task, update_description, u_description, u_status);
+        if (ret)
+            goto exit_failure;
+        else
+            goto exit_success;
     }
 
     // Create new father task

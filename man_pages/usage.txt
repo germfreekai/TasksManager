@@ -33,3 +33,5 @@ Flags:
                                              father - prints only father tasks
                                              all    - prints father and subtasks
                                              [father_task_name] - prints only given father task
+        --remove                        Delete [sub]task, will delete all contents inside, be cautious
+                                             Provide -f and -z as required

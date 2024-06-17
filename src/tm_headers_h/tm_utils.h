@@ -23,6 +23,7 @@ char *get_home_dir();
 char *_get_users_home();
 int dir_exists(char *path);
 int create_dir(char *path);
+int remove_dir(Task *task);
 
 Task *set_new_task_struct();
 void free_task_struct(Task *task);

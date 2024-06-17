@@ -358,3 +358,166 @@ exit_failure:
     ret = 1;
     goto exit_func;
 }
+
+/*
+ * Delete directory / task
+ * Will remove everything inside
+ * Arguments:
+ *  - task (Task*) - task struct
+ * Return:
+ *  - ret (int) - success status
+ *                0 - success
+ *                1 - failure
+ */
+int remove_dir(Task *task)
+{
+    int ret;
+
+    DIR *dir;
+    struct dirent *drnt;
+    char *task_path = get_home_dir();
+    char *task_file_type = set_path_var();
+    char *subtask_path = set_path_var();
+    char *subtask_files = set_path_var();
+
+    strcat(task_path, task->father_task);
+    strcpy(task_file_type, task_path);
+    strcat(task_file_type, "/.father");
+
+    // This is a safe lock for us to delete only TasksManager dirs
+    if (dir_exists(task_path) || file_exists(task_file_type))
+    {
+        fprintf(stderr, "[x] Father task either does not exist or is not a father task... aborting\n");
+        goto return_failure;
+    }
+
+    if (strlen(task->subtask) > 0)
+    {
+        strcat(task_path, "/");
+        strcat(task_path, task->subtask);
+        strcpy(task_file_type, task_path);
+        strcat(task_file_type, "/.subtask");
+
+        if (dir_exists(task_path) || file_exists(task_file_type))
+        {
+            fprintf(stderr, "[x] Subtask either does not exist or is not subtask... aborting\n");
+            goto return_failure;
+        }
+    }
+
+    // we are opening either father task or subtask
+    if (! (dir = opendir(task_path)))
+    {
+        fprintf(stderr, "[x] Failed to open task: %s\n", task_path);
+        goto return_failure;
+    }
+
+    while ((drnt = readdir(dir)) != NULL)
+    {
+        if (!strcmp(drnt->d_name, ".") || !strcmp(drnt->d_name, ".."))
+            continue;
+        // we can assume that is we find a dir, it is subtask and we are sitting
+        // at the father task, so if we find a dir, it is a subtask
+        else if (drnt->d_type == DT_DIR)
+        {
+            strcpy(subtask_path, task_path);
+            strcat(subtask_path, "/");
+            strcat(subtask_path, drnt->d_name);
+
+            // only 3 files to delete [.subtask|.father / status / description]
+            strcpy(subtask_files, subtask_path);
+            strcat(subtask_files, "/.subtask");
+            // Double check we are deleting a valid subtask
+            if (file_exists(subtask_files))
+            {
+                fprintf(stderr, "[x] Directory not a valid subtask\n");
+                goto return_failure;
+            }
+            if (remove_file(subtask_files))
+            {
+                fprintf(stderr, "[x] Failed to remove .subtask file\n");
+                goto return_failure;
+            }
+            strcpy(subtask_files, subtask_path);
+            strcat(subtask_files, "/status");
+            if (! file_exists(subtask_files))
+            {
+                if (remove_file(subtask_files))
+                {
+                    fprintf(stderr, "[x] Failed to remove file staus\n");
+                    goto return_failure;
+                }
+            }
+            strcpy(subtask_files, subtask_path);
+            strcat(subtask_files, "/description");
+            if (! file_exists(subtask_files))
+            {
+                if (remove_file(subtask_files))
+                {
+                    fprintf(stderr, "[x] Failed to remove file description\n");
+                    goto return_failure;
+                }
+            }
+            // remove subtask itself
+            rmdir(subtask_path);
+        }
+        else
+            continue;
+    }
+
+    // Either if we delete subtasks or not, we need to delete current task path
+    // as it could be a father or subtask
+    strcpy(task_file_type, task_path);
+    strcat(task_file_type, "/.subtask");
+    if (! file_exists(task_file_type))
+    {
+        if (remove_file(task_file_type))
+        {
+            fprintf(stderr, "[x] Failed to remove .subtask file\n");
+            goto return_failure;
+        }
+    }
+    strcpy(task_file_type, task_path);
+    strcat(task_file_type, "/.father");
+    if (! file_exists(task_file_type))
+    {
+        if (remove_file(task_file_type))
+        {
+            fprintf(stderr, "[x] Failed to remove .father file\n");
+            goto return_failure;
+        }
+    }
+    strcpy(task_file_type, task_path);
+    strcat(task_file_type, "/status");
+    if (! file_exists(task_file_type))
+    {
+        if (remove_file(task_file_type))
+        {
+            fprintf(stderr, "[x] Failed to remove status file\n");
+            goto return_failure;
+        }
+    }
+    strcpy(task_file_type, task_path);
+    strcat(task_file_type, "/description");
+    if (! file_exists(task_file_type))
+    {
+        if (remove(task_file_type))
+        {
+            fprintf(stderr, "[x] Failed to remove description file\n");
+            goto return_failure;
+        }
+    }
+
+    ret = rmdir(task_path);
+exit_func:
+    free(task_path);
+    free(task_file_type);
+    free(subtask_files);
+    free(subtask_path);
+    if (dir != NULL)
+        closedir(dir);
+    return ret;
+return_failure:
+    ret = 1;
+    goto exit_func;
+}
