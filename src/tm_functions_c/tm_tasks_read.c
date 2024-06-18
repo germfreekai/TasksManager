@@ -327,6 +327,7 @@ int _print_sub_tasks(char *father_path)
             {
                 read_file(status_file, current_status);
                 fprintf(stdout, "  ├ %s - %s\n", drnt->d_name, current_status);
+                current_status[0] = '\0';
             }
             else
                 // we know it is a father task
