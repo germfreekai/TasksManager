@@ -321,7 +321,7 @@ int _print_sub_tasks(char *father_path)
             if (file_exists(subtask_file))
                 continue;
 
-            strcpy(status_file, father_path);
+            strcpy(status_file, subtask_path);
             strcat(status_file, "/status");
             if (! file_exists(status_file))
             {
