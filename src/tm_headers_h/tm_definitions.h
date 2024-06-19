@@ -11,13 +11,14 @@
 #define MAX_TASK_NAME 128
 #define MAX_TASK_DESCRIPTION 16384
 
-#define STATUS_STR(stat)                           \
-    (0 == stat ? "READY"       :                   \
-    (1 == stat ? "IN PROGRESS" :                   \
-    (2 == stat ? "DONE"        :                   \
-    (3 == stat ? "ABANDONED"   :                   \
-    (4 == stat ? "BLOCKED"     :                   \
-                 "NOT DEFINED")))))
+#define STATUS_STR(stat)                            \
+    (0 == stat ? "READY"        :                   \
+    (1 == stat ? "IN PROGRESS"  :                   \
+    (2 == stat ? "DONE"         :                   \
+    (3 == stat ? "ABANDONED"    :                   \
+    (4 == stat ? "BLOCKED"      :                   \
+    (5 == stat ? "UNDER REVIEW" :                   \
+                 "NOT DEFINED"))))))
 
 typedef struct
 {
