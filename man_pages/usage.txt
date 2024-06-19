@@ -27,6 +27,7 @@ Flags:
                                              2 - DONE
                                              3 - ABANDONED
                                              4 - BLOCKED
+                                             5 - UNDER REVIEW
         --u-status                           Update status file
                                              Provide -f and -z as required
         -l | --list-tasks                    List tasks
