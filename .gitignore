@@ -1,0 +1,5 @@
+# bin
+bin/tasksmanager
+
+# obj
+obj/*.o
