@@ -1,0 +1,81 @@
+alias tm=tasksmanager
+tm_describe()
+{
+    father_t="$1"
+    subtask="$2"
+
+    if [ -n "${subtask}" ]; then
+        tasksmanager --describe -f "${father_t}" -z "${subtask}"
+    else
+        tasksmanager --describe -f "${father_t}"
+    fi
+}
+
+_show_status_options()
+{
+    echo -e "[0] READY\n[1] IN PROGRESS\n[2] DONE\n[3] ABANDONED\n[4] BLOCKED\n[5] UNDER REVIEW"
+}
+
+tm_new-task()
+{
+    father_t="$1"
+    subtask="$2"
+
+    echo "Enter a description" 
+    read -p "> " description
+
+    _show_status_options
+    echo "Select status"
+    read -p "> " status
+
+    if [ -n "${subtask}" ]; then
+        tasksmanager --new-subtask -f "${father_t}" -z "${subtask}" -s "${status}" -d "${description}"
+    else
+        tasksmanager --new-task -f "${father_t}" -s "${status}" -d "${description}"
+    fi
+}
+
+tm_update_d()
+{
+    father_t="$1"
+    subtask="$2"
+
+    echo -e "[0] Overwrite\n[1] Append"
+    read -p "> " u_description
+    echo "Enter a description"
+    read -p "> " description
+    
+    if [ -n "${subtask}" ]; then
+        tasksmanager --u-description "${u_description}" -d "${description}" -f "${father_t}" -z "${subtask}"
+    else
+        tasksmanager --u-description "${u_description}" -d "${description}" -f "${father_t}"
+    fi
+}
+
+tm_update_s()
+{
+    father_t="$1"
+    subtask="$2"
+
+    _show_status_options
+    echo "Select status"
+    read -p "> " status
+
+    if [ -n "${subtask}" ]; then
+        tasksmanager --u-status -s "${status}" -f "${father_t}" -z "${subtask}"
+    else
+        tasksmanager --u-status -s "${status}" -f "${father_t}"
+    fi
+}
+
+tm_remove_task()
+{
+    father_t="$1"
+    subtask="$2"
+    
+    if [ -n "${subtask}" ]; then
+        tasksmanager --remove -f "${father_t}" -z "${subtask}"
+    else
+        tasksmanager --remove -s "${status}" -f "${father_t}"
+    fi
+}
