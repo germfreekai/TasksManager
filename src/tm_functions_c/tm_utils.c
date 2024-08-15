@@ -26,10 +26,9 @@ int read_man_page(char *man_page)
     FILE *fptr;
     int ret;
 
-    char *path = set_path_var();
+    char *path = get_home_dir();
 
-    strcat(path, _get_users_home());
-    strcat(path, "/.tasks_manager_info_pages/");
+    strcat(path, "/man_pages/");
     strcat(path, man_page);
 
     if ( !(fptr = fopen(path, "r")) )
