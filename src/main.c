@@ -42,7 +42,6 @@ int main(int argc, char *argv[argc + 1])
     {
         static struct option long_options[] = {
             {"help", no_argument, NULL, 'h'},
-            {"setup", no_argument, NULL, 'i'},
             {"new-task", no_argument, &new_task_flag, 1},
             {"new-subtask", no_argument, &new_sub_task_flag, 1},
             {"describe-tasks", no_argument, &describe, 1},
@@ -71,10 +70,6 @@ int main(int argc, char *argv[argc + 1])
                     break;
             case 'h':
                 read_man_page("usage.txt");
-                goto end_execution;
-                break;
-            case 'i':
-                ret = setup_home_dir();
                 goto end_execution;
                 break;
             case 'f':

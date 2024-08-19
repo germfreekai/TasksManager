@@ -8,7 +8,6 @@ tasksmanager [options]
 Flags:
 
         -h | --help                          Show usage help
-        -i | --setup                         Create ~/.tasks_manager dir if non-existing
         --new-task                           Create new father task
         --new-subtask                        Create new subtask
         --describe-tasks                     Get tasks details
