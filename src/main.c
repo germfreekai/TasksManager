@@ -68,10 +68,12 @@ int main(int argc, char *argv[argc + 1])
             case 0:
                 if (long_options[option_index].flag != 0)
                     break;
+            // Show help
             case 'h':
                 read_man_page("usage.txt");
                 goto end_execution;
                 break;
+            // Father task name
             case 'f':
                 if (strlen(task->father_task) != 0)
                     break;
@@ -81,8 +83,8 @@ int main(int argc, char *argv[argc + 1])
                     goto exit_failure;
                 } 
                 strcat(task->father_task, optarg);
-                fprintf(stdout, "[+] Task name: %s\n", task->father_task);
                 break;
+            // Subtask name
             case 'z':
                 if (strlen(task->subtask) != 0)
                     break;
@@ -92,8 +94,8 @@ int main(int argc, char *argv[argc + 1])
                     goto exit_failure;
                 }
                 strcat(task->subtask, optarg);
-                fprintf(stdout, "[+] Subtask name: %s\n", task->subtask);
                 break;
+            // Description field
             case 'd':
                 if (strlen(task->task_description) != 0)
                     break;
@@ -103,19 +105,25 @@ int main(int argc, char *argv[argc + 1])
                     goto exit_failure;
                 }
                 strcat(task->task_description, optarg);
-                fprintf(stdout, "[+] Task description: %s\n", task->task_description);
                 break;
+            // Update description flag
+            // 0 overwrite
+            // 1 append
             case 'u':
                 u_description = 1;
                 update_description = atoi(optarg);
                 break;
+            // Status
             case 's':
                 if (task->status != -1)
                     break;
                 int stat = atoi(optarg);
-                fprintf(stdout, "[+] Status: %s\n", STATUS_STR(stat));
                 task->status = stat;
                 break;
+            // List tasks
+            // father - father tasks
+            // all - all tasks
+            // task_name - father task and subtasks
             case 'l':
                 list_option = set_task_name_var();
                 strcat(list_option, optarg);
@@ -140,7 +148,6 @@ int main(int argc, char *argv[argc + 1])
     // Remove a task
     if (remove)
     {
-        fprintf(stdout, "[+] Removing task...\n");
         ret = remove_dir(task);
         if (ret)
             goto exit_failure;
@@ -151,7 +158,6 @@ int main(int argc, char *argv[argc + 1])
     // Get tasks details
     if (describe)
     {
-        fprintf(stdout, "[+] Describing tasks\n");
         ret = describe_tasks(task);
 
         if (ret)
@@ -185,7 +191,6 @@ int main(int argc, char *argv[argc + 1])
     if (new_task_flag)
     {
         new_sub_task_flag = 0;
-        fprintf(stdout, "[+] Create new father task\n");
         if (strlen(task->task_description) == 0)
         {
             fprintf(stderr, "[x] Father tasks must contain a description\n");
@@ -198,9 +203,9 @@ int main(int argc, char *argv[argc + 1])
             goto exit_success;
     }
 
+    // Create new subtask
     if (new_sub_task_flag)
     {
-        fprintf(stdout, "[+] Create new subtask\n");
         if (strlen(task->task_description) == 0)
         {
             fprintf(stderr, "[x] Missing description\n");

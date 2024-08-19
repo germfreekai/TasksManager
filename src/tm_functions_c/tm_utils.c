@@ -272,6 +272,7 @@ int write_file(char *path, char *content, int update)
     int ret = 0;
     FILE *fptr;
 
+    // Overwrite
     if (! file_exists(path) && ! update)
     {
         if (! (fptr = fopen(path, "w")))
@@ -282,6 +283,7 @@ int write_file(char *path, char *content, int update)
             fclose(fptr);
         }
     }
+    // Append
     else if (! file_exists(path) && update)
     {
         if (! (fptr = fopen(path, "a")))

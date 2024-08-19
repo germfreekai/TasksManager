@@ -311,6 +311,8 @@ return_failure:
  * Arguments:
  *  - task (Task*) - task structure
  *  - update_description (int) - description update option
+ *                               0 overwrite
+ *                               1 append
  *  - u_description (int) - boolean to update description
  *  - u_status (int) - boolean to update status
  *
