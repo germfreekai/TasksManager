@@ -18,6 +18,7 @@ void end_tm_execution(int exit_code);
 char *set_path_var();
 char *set_description_var();
 char *set_task_name_var();
+char *set_status_file_content_var();
 
 char *get_home_dir();
 char *_get_users_home();
