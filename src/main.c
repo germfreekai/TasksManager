@@ -7,7 +7,6 @@
 #include <string.h>
 #include <getopt.h>
 #include "tm_headers_h/tm_utils.h"
-#include "tm_headers_h/tm_setup.h"
 #include "tm_headers_h/tm_definitions.h"
 #include "tm_headers_h/tm_tasks_write.h"
 #include "tm_headers_h/tm_tasks_read.h"
