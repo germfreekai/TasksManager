@@ -32,8 +32,8 @@ int list_tasks(char *list_option)
     // Will a function per option
     // pro code readability
 
-    enum OPTIONS opt = (!strcmp(list_option, "father")) ? FATHER : \
-                       (!strcmp(list_option, "all")) ? ALL : OTHER;
+    enum OPTIONS opt = (!strcmp(list_option, "f")) ? FATHER : \
+                       (!strcmp(list_option, "a")) ? ALL : OTHER;
 
     switch (opt)
     {
