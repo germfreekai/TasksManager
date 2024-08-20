@@ -10,6 +10,8 @@
 #define PATH_MAX 4096
 #define MAX_TASK_NAME 128
 #define MAX_TASK_DESCRIPTION 16384
+#define MAX_STATUS_FILE 15
+#define MAX_SUBTASKS 100
 
 #define STATUS_STR(stat)                            \
     (0 == stat ? "READY"        :                   \

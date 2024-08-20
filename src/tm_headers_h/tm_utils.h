@@ -19,6 +19,8 @@ char *set_path_var();
 char *set_description_var();
 char *set_task_name_var();
 char *set_status_file_content_var();
+char *set_subtasks_number_var();
+void *subtasks_int_to_string(int subtasks_n, char *dst);
 
 char *get_home_dir();
 char *_get_users_home();

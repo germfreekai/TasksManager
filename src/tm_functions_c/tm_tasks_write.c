@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../tm_headers_h/tm_tasks_write.h"
+#include "../tm_headers_h/tm_tasks_read.h"
 #include "../tm_headers_h/tm_definitions.h"
 #include "../tm_headers_h/tm_utils.h"
 
@@ -59,7 +60,17 @@ int create_father_task(Task *task)
 
     // Create description file if given
     if (_write_description_file(task_path, task->task_description, 0))
+    {
+        fprintf(stderr, "[x] Failed to write description file for task: %s\n", task->father_task);
         goto return_failure;
+    }
+
+    // Create .subtaks count file
+    if (_write_subtasks_count_file(task_path))
+    {
+        fprintf(stderr, "[x] Failed to write .subtask file for task: %s\n", task->father_task);
+        goto return_failure;
+    }
 
     ret = 0;
 exit_func:
@@ -96,9 +107,24 @@ int create_sub_task(Task *task)
 
     // Get father task path
     char *task_path = get_home_dir();
+    char *father_task_path = set_path_var();
+    char *father_subtasks_file = set_path_var();
+    char *subtasks_s = set_subtasks_number_var();
 
     // Verify father task path
     strcat(task_path, task->father_task);
+    strcat(father_task_path, task_path);
+    strcat(father_subtasks_file, father_task_path);
+    strcat(father_subtasks_file, "/.subtasks_n");
+
+    get_subtasks_number(father_subtasks_file, subtasks_s);
+    int subtask_n = atoi(subtasks_s);
+    if (subtask_n == MAX_SUBTASKS)
+    {
+        fprintf(stderr, "[x] Max number of subtasks already reached: %d\n", MAX_SUBTASKS);
+        goto return_failure;
+    }
+
     if (dir_exists(task_path))
     {
         fprintf(stderr, "[x] Father task does not exists: %s\n", task->father_task);
@@ -137,11 +163,20 @@ int create_sub_task(Task *task)
             goto return_failure;
         }
     }
-    
+
+    if (_write_subtasks_count_file(father_task_path))
+    {
+        fprintf(stderr, "[X] Failed to update .subtasks file for father task: %s\n", task->father_task);
+        goto return_failure;
+    }
+
     ret = 0;
 
 exit_func:
     free(task_path);
+    free(father_task_path);
+    free(father_subtasks_file);
+    free(subtasks_s);
     return ret;
 return_failure:
     ret = 1;
@@ -165,7 +200,7 @@ int _create_task(char *path)
 {
     if (! dir_exists(path))
     {
-        fprintf(stdout, "[x] Father task already exists\n");
+        fprintf(stdout, "[x] Task already exists\n");
         return 1;
     }
 
@@ -239,6 +274,54 @@ int _write_status_file(char *task_path, int status)
 }
 
 /*
+ * Create/write a file with num of subtasks
+ * get control over number of subtasks for a father task
+ *
+ * Arguments:
+ *  - task_path (char*) - absolute path to task
+ *
+ * Returns:
+ *  - ret (int) - Success status
+ *                0 - success
+ *                1 - failure
+ */
+int _write_subtasks_count_file(char *task_path)
+{
+    int ret = 0;
+    char *subtasks_s = set_subtasks_number_var();
+    int subtasks_n;
+    char *subtasks_file_path = set_path_var();
+
+    strcat(subtasks_file_path, task_path);
+    strcat(subtasks_file_path, "/.subtasks_n");
+
+    if (! file_exists(subtasks_file_path))
+    {
+        get_subtasks_number(subtasks_file_path, subtasks_s);
+        subtasks_n = atoi(subtasks_s);
+        subtasks_n++;
+        subtasks_s[0] = '\0';
+        subtasks_int_to_string(subtasks_n, subtasks_s);
+    }
+
+    if (strlen(subtasks_s) == 0)
+    {
+        strcat(subtasks_s, "0");
+    }
+
+    if (write_file(subtasks_file_path, subtasks_s, 0))
+    {
+        fprintf(stderr, "[x] Failed to write .subtaks file\n");
+        ret = 1;
+    }
+
+    free(subtasks_file_path);
+    free(subtasks_s);
+
+    return ret;
+}
+
+/*
  * Create/write description file
  * Verifies if we want to overwrite or append more details
  * 
@@ -250,8 +333,8 @@ int _write_status_file(char *task_path, int status)
  *      1 - append
  * Returns:
  *  - ret (int) - Success status
- *      0 - success
- *      1 - failure
+ *                0 - success
+ *                1 - failure
  *
  */
 int _write_description_file(char *task_path, char *description, int update)
@@ -263,7 +346,6 @@ int _write_description_file(char *task_path, char *description, int update)
     if (strlen(description) == 0)
         goto exit_func;
 
-    // TODO - implement case when append is required
     strcat(description_file, task_path);
     strcat(description_file, "/description");
 

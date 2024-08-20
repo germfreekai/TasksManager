@@ -20,17 +20,15 @@ enum OPTIONS {
  *
  * Arguments:
  *  - list_option (char*) - father task name
+ *  - status (int) - status to list
  * Returns:
  *  - ret (int) - success status
  *                0 - success
  *                1 - failure
  */
-int list_tasks(char *list_option)
+int list_tasks(char *list_option, int status)
 {
     int ret;
-
-    // Will a function per option
-    // pro code readability
 
     enum OPTIONS opt = (!strcmp(list_option, "f")) ? FATHER : \
                        (!strcmp(list_option, "a")) ? ALL : OTHER;
@@ -38,15 +36,15 @@ int list_tasks(char *list_option)
     switch (opt)
     {
         case 0:
-            ret = _display_tasks(NULL, 0);
+            ret = _display_tasks(NULL, 0, status);
             goto exit_func;
             break;
         case 1:
-            ret = _display_tasks(NULL, 1);
+            ret = _display_tasks(NULL, 1, status);
             goto exit_func;
             break;
         default:
-            ret = _display_tasks(list_option, 0);
+            ret = _display_tasks(list_option, 0, status);
             goto exit_func;
             break;
     }
@@ -84,7 +82,7 @@ int describe_tasks(Task *task)
     char *description_file = set_path_var();
     char *description_file_content = set_description_var();
     char *status_file = set_path_var();
-    char *status_file_content = (char*)calloc(13,sizeof(char));
+    char *status_file_content = set_status_file_content_var();
 
     if (! strlen(task->father_task))
     {
@@ -160,7 +158,7 @@ int describe_tasks(Task *task)
     if (! subtask)
     {
         fprintf(stdout, "STRUCTURE:\n");
-        ret = _display_tasks(task->father_task, 0);
+        ret = _display_tasks(task->father_task, 0, -1);  // default dipslay tasks = all = -2
 
         if (ret)
             goto exit_failure;
@@ -186,17 +184,44 @@ exit_failure:
 }
 
 /*
+ * Get number of subtasks
+ * File should already been verified to exist
+ *
+ * Arguments:
+ *  - subtasks_file_path (char*) - absolute path to subtasks file
+ *  - dst (char*) - var to write into
+ *
+ * Returns:
+ *  - subtasks_n (char*) - number of current subtasks
+ */
+
+void *get_subtasks_number(char *subtasks_file_path, char *dst)
+{
+    // char *subtasks_n = set_subtasks_number_var();
+    if (read_file(subtasks_file_path, dst))
+        fprintf(stderr, "[x] Could not read file .subtask\n");
+
+    return NULL;
+}
+
+// TODO: rewrite - review _display_tasks and _print_subtaks
+
+/*
  * Display all existing tasks
  * 
  * Arguments:
  *  - list_option (char*) - father task name
  *  - flag_subtasks (int) - display subtasks
+ *                          0 - display
+ *                          1 - do not display
+ *  - status (int) - status tasks to display
+ *                   if -1 given, print all
  * Returns:
  *  - ret (int) - success status
  *                0 - success
  *                1 - failure
  */
-int _display_tasks(char *list_option, int flag_subtasks)
+int _display_tasks(char *list_option, int flag_subtasks, int status)
 {
     int ret;
     
@@ -205,7 +230,11 @@ int _display_tasks(char *list_option, int flag_subtasks)
     char *father_path = set_path_var();
     char *father_file = set_path_var();
     char *status_file = set_path_var();
-    char *current_status = set_task_name_var();
+    char *current_status = set_status_file_content_var();
+    char *father_subtasks_path = set_path_var();
+    char *subtasks_s = set_subtasks_number_var();
+    int subtasks_n;
+    char *display_subtasks = NULL;
 
     int compare_flag = 0;
     if (list_option)
@@ -240,21 +269,33 @@ int _display_tasks(char *list_option, int flag_subtasks)
             strcat(father_file, "/.father");
             if (file_exists(father_file)) // not a father file? skip
                 continue;
+
+            // Get number of subtasks
+            strcpy(father_subtasks_path, father_path);
+            strcat(father_subtasks_path, "/.subtasks_n");
+            get_subtasks_number(father_subtasks_path, subtasks_s);
+            subtasks_n = atoi(subtasks_s);
             
+            if (!flag_subtasks)
+                display_subtasks = _print_sub_tasks(father_path);
+
             strcpy(status_file, father_path);
             strcat(status_file, "/status");
             if (! file_exists(status_file))
             {
                 read_file(status_file, current_status);
-                fprintf(stdout, "+ %s - %s\n", drnt->d_name, current_status);
+                if (status == -1 || ! strcmp(current_status, STATUS_STR(status)) || (subtasks_n != 0 && strlen(display_subtasks) != 0))
+                    fprintf(stdout, "+ %s - %s\n", drnt->d_name, current_status);
                 current_status[0] = '\0';
             }
             else
                 // we know it is a father task
+                // status files are supposed to always exist, but
+                // print alone in case user removed it
                 fprintf(stdout, "+ %s\n", drnt->d_name);
 
-            if (!flag_subtasks)
-                _print_sub_tasks(father_path);
+            if (strlen(display_subtasks) != 0)
+                fprintf(stdout, "%s", display_subtasks);
         }
         else
             continue;
@@ -270,6 +311,13 @@ exit_func:
     free(father_file);
     free(current_status);
     free(status_file);
+    free(father_subtasks_path);
+    free(subtasks_s);
+    if (strlen(display_subtasks) != 0)
+    {
+        fprintf(stdout, "FREEEEEEING\n\n");
+        free(display_subtasks);
+    }
 
     return ret;
 exit_failure:
@@ -285,13 +333,11 @@ exit_failure:
  *  - father_path (char) - path to a father task
  * 
  * Returns:
- *  - ret (int) - success status
- *                0 - success
- *                1 - failure
+ *  - display_subtasks (char*) - subtaks to display
+ *                               NULL if none
  */
-int _print_sub_tasks(char *father_path)
+char *_print_sub_tasks(char *father_path)
 {
-    int ret;
 
     DIR *dir;
     struct dirent *drnt;
@@ -299,6 +345,9 @@ int _print_sub_tasks(char *father_path)
     char *subtask_file = set_path_var();
     char *status_file = set_path_var();
     char *current_status = set_task_name_var();
+
+    char *display_subtasks = set_description_var();  // MAX_TASK_DESCRIPTION
+    char *formatted_string = set_description_var();
 
     if (!(dir = opendir(father_path)))
     {
@@ -327,13 +376,16 @@ int _print_sub_tasks(char *father_path)
             if (! file_exists(status_file))
             {
                 read_file(status_file, current_status);
-                fprintf(stdout, "  ├ %s - %s\n", drnt->d_name, current_status);
+                snprintf(formatted_string, MAX_TASK_DESCRIPTION, "  ├ %s - %s\n", drnt->d_name, current_status);
+                strcat(display_subtasks, formatted_string);
                 current_status[0] = '\0';
             }
             else
+            {
                 // we know it is a father task
-                fprintf(stdout, "  ├ %s\n", drnt->d_name);
-
+                snprintf(formatted_string, MAX_TASK_DESCRIPTION, "  ├ %s\n", drnt->d_name);
+                strcat(display_subtasks, formatted_string);
+            }
         }
         else
             continue;
@@ -341,15 +393,14 @@ int _print_sub_tasks(char *father_path)
 
     closedir(dir);
 
-    ret = 0;
-
 exit_func:
     free(subtask_file);
     free(subtask_path);
     free(status_file);
     free(current_status);
-    return ret;
+    free(formatted_string);
+    return display_subtasks;
 exit_failure:
-    ret = 1;
+    display_subtasks = NULL;
     goto exit_func;
 }

@@ -11,6 +11,8 @@
 #include "tm_headers_h/tm_tasks_write.h"
 #include "tm_headers_h/tm_tasks_read.h"
 
+// TODO - info page for task creation operations and bounds
+
 int main(int argc, char *argv[argc + 1])
 {
     int ret = 0;
@@ -37,6 +39,9 @@ int main(int argc, char *argv[argc + 1])
     int u_description = 0;
     int update_description = -1;
 
+    // Status var
+    int status = -1;
+
     while (1)
     {
         static struct option long_options[] = {
@@ -56,7 +61,7 @@ int main(int argc, char *argv[argc + 1])
 
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "hif:z:d:s:l:", long_options, &option_index);
+        c = getopt_long (argc, argv, "hf:z:d:s:l:", long_options, &option_index);
 
         /* Detect the end of the options */
         if (c == -1)
@@ -116,8 +121,8 @@ int main(int argc, char *argv[argc + 1])
             case 's':
                 if (task->status != -1)
                     break;
-                int stat = atoi(optarg);
-                task->status = stat;
+                status = atoi(optarg);
+                task->status = status;
                 break;
             // List tasks
             // father - father tasks
@@ -126,9 +131,7 @@ int main(int argc, char *argv[argc + 1])
             case 'l':
                 list_option = set_task_name_var();
                 strcat(list_option, optarg);
-                ret = list_tasks(list_option);
-                free(list_option);
-                goto end_execution;
+                break;
             case '?':
                 break;
             default:
@@ -142,6 +145,14 @@ int main(int argc, char *argv[argc + 1])
     {
         fprintf(stderr, "[x] Missing TaskManager home dir.\n");
         goto exit_failure;
+    }
+
+    // List options
+    if (list_option)
+    {
+        ret = list_tasks(list_option, status);
+        free(list_option);
+        goto end_execution;
     }
 
     // Remove a task
@@ -225,7 +236,6 @@ end_execution:
     free_task_struct(task);
     end_tm_execution(ret);
 exit_failure:
-    // TODO - info page for task creation operations and bounds
     ret = 1;
     goto end_execution;
 exit_success:

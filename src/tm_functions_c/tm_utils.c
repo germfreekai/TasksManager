@@ -99,6 +99,68 @@ char *set_description_var()
     return var;
 }
 
+/*
+ * Set memory for the number of subtasks at
+ * .subtask file
+ * 
+ * Returns:
+ *  - subtasks_n (char*) - dynamic memory [4] - 3 digits and null char
+ *                         Null terminated at index 0
+ */
+char *set_subtasks_number_var()
+{
+    char *subtasks_n = (char*)calloc(4, sizeof(char));
+    subtasks_n[0] = '\0';
+
+    return subtasks_n;
+}
+
+/*
+ * Convert int to char* for subtasks n
+ *
+ * Argument:
+ *  - subtasks_n (int) - number of subtaks found at .subtask
+ *  - dst (char*) - var to write into
+ * Returns:
+ *  - subtasks_s (char*) - string of number of subtasks
+ */
+void *subtasks_int_to_string(int subtasks_n, char *dst)
+{
+    int max_subtasks = subtasks_n < 10 ? 1 : subtasks_n < 100 ? 10 : 100;
+
+    char *digit_c = (char*)calloc(2, sizeof(char));
+    digit_c[0] = '\0';
+
+    while (max_subtasks > 0)
+    {
+        int digit_n = subtasks_n / max_subtasks;
+        digit_c[0] = digit_n + '0'; // cast to char with + '0'
+        strcat(dst, digit_c);
+
+        subtasks_n = subtasks_n % max_subtasks;
+        max_subtasks = max_subtasks / 10;
+    }
+
+    free(digit_c);
+
+    return NULL;
+}
+
+/*
+ * Set memory for the content of a status file
+ *
+ * Returns:
+ *  - status (char*) - dynamic memory [MAX_STATUS_FILE]
+ *                     Null terminated at index 0
+ */
+char *set_status_file_content_var()
+{
+    char *status = (char*)calloc(MAX_STATUS_FILE, sizeof(char));
+    status[0] = '\0';
+
+    return status;
+}
+
 /* Set memory for a task name variable
  *
  * Returns:
@@ -273,7 +335,7 @@ int write_file(char *path, char *content, int update)
     FILE *fptr;
 
     // Overwrite
-    if (! file_exists(path) && ! update)
+    if ((! file_exists(path) && ! update) || file_exists(path))
     {
         if (! (fptr = fopen(path, "w")))
             ret = 1;
@@ -372,6 +434,9 @@ exit_failure:
  */
 int remove_dir(Task *task)
 {
+// TODO: add option to remove "/.subtasks" file at father
+// TODO: this function is way to long and repetitive - shorthen it
+// TODO: if dir removed is a subtasks, substract 1 from .subtasks
     int ret;
 
     DIR *dir;
