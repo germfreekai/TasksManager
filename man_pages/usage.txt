@@ -7,31 +7,32 @@ tasksmanager [options]
 
 Flags:
 
-        -h | --help                          Show usage help
-        --new-task                           Create new father task
-        --new-subtask                        Create new subtask
-        --describe-tasks                     Get tasks details
-                                             Provide -f for father task description
-                                             Provide -f and -z for subtask description
-        -f | --father-task [task_name]       Task name [MAX 128]
-        -z | --subtask [subtask_name]        Subtask name [MAX 128]
-        -d | --description [description]     Task's description [MAX 16384]
-        --u-description [option]             Update description file
-                                             Provide -f and -z as required
-                                             0 - overwrite
-                                             1 - append
-        -s | --status [status]               Task status
-                                             0 - READY (DEFAULT)
-                                             1 - IN PROGRESS
-                                             2 - DONE
-                                             3 - ABANDONED
-                                             4 - BLOCKED
-                                             5 - UNDER REVIEW
-        --u-status                           Update status file
-                                             Provide -f and -z as required
-        -l | --list-tasks                    List tasks
-                                             f - prints only father tasks
-                                             a    - prints father and subtasks
-                                             [father_task_name] - prints only given father task
-        --remove                        Delete [sub]task, will delete all contents inside, be cautious
-                                             Provide -f and -z as required
+        -h | --help                             Show usage help
+        --new-task                              Create new father task
+        --new-subtask                           Create new subtask
+        --describe-tasks                        Get tasks details
+                                                Provide -f for father task description
+                                                Provide -f and -z for subtask description
+        -f | --father-task [task_name]          Task name [MAX 128]
+        -z | --subtask [subtask_name]           Subtask name [MAX 128]
+        -d | --description [description]        Task's description [MAX 16384]
+        --u-description [option]                Update description file
+                                                Provide -f and -z as required
+                                                0 - overwrite
+                                                1 - append
+        -s | --status [status]                  Task status
+                                                0 - READY (DEFAULT)
+                                                1 - IN PROGRESS
+                                                2 - DONE
+                                                3 - ABANDONED
+                                                4 - BLOCKED
+                                                5 - UNDER REVIEW
+        --u-status                              Update status file
+                                                Provide -f and -z as required
+        -l | --list-tasks [option] [status]     List tasks
+                                                f - prints only father tasks
+                                                a - prints father and subtasks
+                                                Provide -s with a specific status to show
+                                                [father_task_name] - prints only given father task
+        --remove                                Delete [sub]task, will delete all contents inside, be cautious
+                                                Provide -f and -z as required

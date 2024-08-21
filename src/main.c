@@ -38,6 +38,7 @@ int main(int argc, char *argv[argc + 1])
     char *list_option = NULL;
     int u_description = 0;
     int update_description = -1;
+    int list_tasks_flag = 0;
 
     // Status var
     int status = -1;
@@ -131,6 +132,7 @@ int main(int argc, char *argv[argc + 1])
             case 'l':
                 list_option = set_task_name_var();
                 strcat(list_option, optarg);
+                list_tasks_flag = 1;
                 break;
             case '?':
                 break;
@@ -148,9 +150,10 @@ int main(int argc, char *argv[argc + 1])
     }
 
     // List options
-    if (list_option)
+    if (list_tasks_flag)
     {
         ret = list_tasks(list_option, status);
+        //if (list_option)
         free(list_option);
         goto end_execution;
     }
