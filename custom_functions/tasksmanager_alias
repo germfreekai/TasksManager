@@ -16,7 +16,7 @@ _show_status_options()
     echo -e "[0] READY\n[1] IN PROGRESS\n[2] DONE\n[3] ABANDONED\n[4] BLOCKED\n[5] UNDER REVIEW"
 }
 
-tm_new-task()
+tm_new_task()
 {
     father_t="$1"
     subtask="$2"
