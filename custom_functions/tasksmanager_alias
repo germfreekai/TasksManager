@@ -40,11 +40,18 @@ tm_update_d()
     father_t="$1"
     subtask="$2"
 
+    # Show current content first
+    if [ -n "${subtask}" ]; then
+        tm_describe "${father_t}" "${subtask}"
+    else
+        tm_describe "${father_t}"
+    fi
+
     echo -e "[0] Overwrite\n[1] Append"
     read -p "> " u_description
     echo "Enter a description"
     read -p "> " description
-    
+
     if [ -n "${subtask}" ]; then
         tasksmanager --u-description "${u_description}" -d "${description}" -f "${father_t}" -z "${subtask}"
     else
